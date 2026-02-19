@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path=":memory:" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1953"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="amazon_sales" custom_title="0" dock_id="2" table="4,12:mainamazon_sales"/><dock_state state="000000ff00000000fd0000000100000002000005940000032bfc0100000002fb000000160064006f0063006b00420072006f00770073006500310100000000000005940000000000000000fb000000160064006f0063006b00420072006f00770073006500320100000000000005940000010100ffffff0000027e0000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1*">CREATE TABLE amazon_sales_clean AS
+SELECT
+    field2 AS order_id,
+    date(
+        '20' || substr(field3, 7, 2) || '-' ||
+        substr(field3, 1, 2) || '-' ||
+        substr(field3, 4, 2)
+    ) AS order_date,
+    field4 AS status,
+    field10 AS category,
+    field14 AS quantity,
+    field16 AS amount,
+    field17 AS ship_city,
+    field18 AS ship_state,
+    field20 AS ship_country
+FROM amazon_sales
+WHERE field3 != 'Date';
+
+
+CREATE TABLE order_funnel AS
+SELECT
+    order_id,
+    order_date,
+    ship_state,
+    ship_city,
+    category,
+    amount,
+    CASE
+        WHEN status LIKE 'Shipped%'
+             AND status NOT LIKE '%Returned%'
+             AND status NOT LIKE '%Rejected%'
+             AND status NOT LIKE '%Lost%'
+             AND status NOT LIKE '%Damaged%'
+            THEN 'Completed'
+        WHEN status = 'Cancelled'
+             OR status LIKE '%Returned%'
+             OR status LIKE '%Rejected%'
+             OR status LIKE '%Lost%'
+             OR status LIKE '%Damaged%'
+            THEN 'Cancelled / Failed'
+        ELSE 'Pending'
+    END AS order_stage
+FROM amazon_sales_clean;
+
+
+
+SELECT
+    order_stage,
+    COUNT(DISTINCT order_id) AS orders,
+    ROUND(SUM(amount), 2) AS revenue
+FROM order_funnel
+GROUP BY order_stage
+ORDER BY revenue DESC;
+
+
+SELECT
+    CASE
+        WHEN order_stage = 'Completed' THEN 'Revenue Earned'
+        WHEN order_stage = 'Cancelled / Failed' THEN 'Revenue Lost'
+        ELSE 'Pending Revenue'
+    END AS revenue_stage,
+    ROUND(SUM(amount), 2) AS revenue
+FROM order_funnel
+GROUP BY revenue_stage;
+
+SELECT
+    ship_city,
+    SUM(amount) AS revenue
+FROM order_funnel
+WHERE order_stage = 'Completed'
+GROUP BY ship_city
+ORDER BY revenue DESC
+LIMIT 10;
+
+SELECT
+    ship_state,
+    SUM(amount) AS revenue
+FROM order_funnel
+WHERE order_stage = 'Completed'
+GROUP BY ship_state
+ORDER BY revenue DESC;
+
+
+SELECT
+    strftime('%Y-%m', order_date) AS month,
+    SUM(amount) AS revenue
+FROM order_funnel
+WHERE order_stage = 'Completed'
+GROUP BY month
+ORDER BY month;
+
+
+SELECT
+    category,
+    SUM(amount) AS revenue
+FROM order_funnel
+WHERE order_stage = 'Completed'
+GROUP BY category
+ORDER BY revenue DESC;
+
+
+
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
