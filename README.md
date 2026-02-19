@@ -137,4 +137,4 @@ The layout follows clean BI design principles:
 > *([ dashboard screenshot here](https://github.com/Tuberamesh/Amazon-sales-analytics-dashboard/blob/main/images/Tableau%20bi%20.png))*
 
 
-*([live Dashboard Preview ](https://public.tableau.com/app/profile/ramesh.g8388/viz/Amazonsalesperformance/Dashboard1?publish=yes))*
+> *([live Dashboard Preview ](https://public.tableau.com/app/profile/ramesh.g8388/viz/Amazonsalesperformance/Dashboard1?publish=yes))*
