@@ -134,7 +134,7 @@ The layout follows clean BI design principles:
 
 ## 📸 Dashboard Preview
 
-> *(Upload your dashboard screenshot here)*
+> *([Upload your dashboard screenshot here](https://github.com/Tuberamesh/Amazon-sales-analytics-dashboard/blob/main/images/Tableau%20bi%20.png))*
 
 ```markdown
 ![Dashboard Preview](images/dashboard_preview.png)
